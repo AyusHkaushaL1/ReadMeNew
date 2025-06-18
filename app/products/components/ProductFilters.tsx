@@ -1,9 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
@@ -11,7 +10,13 @@ import { Search } from "lucide-react"
 export default function ProductFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    setSearchTerm(searchParams.get("search") || "")
+  }, [searchParams])
 
   const categories = [
     { value: "", label: "All Categories" },
@@ -33,6 +38,8 @@ export default function ProductFilters() {
   ]
 
   const updateFilter = (key: string, value: string) => {
+    if (!mounted) return
+
     const params = new URLSearchParams(searchParams.toString())
     if (value) {
       params.set(key, value)
@@ -46,6 +53,22 @@ export default function ProductFilters() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     updateFilter("search", searchTerm)
+  }
+
+  if (!mounted) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md animate-pulse">
+        <div className="h-6 bg-gray-200 rounded mb-4"></div>
+        <div className="space-y-4">
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-8 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

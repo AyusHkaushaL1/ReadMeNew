@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 export default function ProductGrid() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 12,
@@ -19,8 +20,14 @@ export default function ProductGrid() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    fetchProducts()
-  }, [searchParams])
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      fetchProducts()
+    }
+  }, [searchParams, mounted])
 
   const fetchProducts = async (page = 1) => {
     setLoading(true)
@@ -51,7 +58,7 @@ export default function ProductGrid() {
     }
   }
 
-  if (loading && products.length === 0) {
+  if (!mounted || (loading && products.length === 0)) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
